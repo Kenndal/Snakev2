@@ -9,14 +9,16 @@ using namespace std;
 class Snake
 {
 
+private:
     struct body
     {
         int x,y;
     };
 
+public:
     vector<body> snake;
 
-
+public:
     void startingPosition(int vertical, int horizontal)
     {
         snake.push_back(body());
@@ -32,14 +34,13 @@ class Snake
 class Map
 {
 
-
+public:
     int vertical;
     int horizontal;
     vector<vector<int> > field;
 
-
+public:
     Map() {}
-
 
     void setVertical(int ver)
     {
@@ -181,6 +182,9 @@ public:
         }
         cout << "GAME OVER";
     }
+
+
+private:
 
     bool directionCheck()
     {
