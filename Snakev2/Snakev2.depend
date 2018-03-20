@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1521573432 source:d:\zadanka\snakev2\main.cpp
+	<iostream>
+	<vector>
+	<cstdlib>
+	<conio.h>
+	<windows.h>
+	<ctime>
+
