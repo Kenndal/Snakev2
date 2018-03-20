@@ -18,7 +18,7 @@ private:
 public:
     vector<body> snake;
 
-public:
+
     void startingPosition(int vertical, int horizontal)
     {
         snake.push_back(body());
@@ -39,7 +39,6 @@ public:
     int horizontal;
     vector<vector<int> > field;
 
-public:
     Map() {}
 
     void setVertical(int ver)
