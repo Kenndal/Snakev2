@@ -38,7 +38,6 @@ public:
     int vertical;
     int horizontal;
     vector<vector<int> > field;
-
     Map() {}
 
     void setVertical(int ver)
@@ -109,6 +108,9 @@ private:
     Snake snake;
     Map mapa;
     char direction, earlier_direction=0;
+    enum directionEnum {RIGHT, LEFT, UP, DOWN};
+    int speedDecrease = 0;
+    int score = 0;
 
 public:
     Game(int vertical, int horizontal)
@@ -129,59 +131,67 @@ public:
         system("cls"); // fix double map bug
 
 
-        while(direction !=27)
+        if(direction==97 || direction==100 || direction==115 || direction==119)
         {
-            if (kbhit()) // change direction
+            while(direction !=27)
             {
-                direction = getch();
-            }
-            if(directionCheck())
-            {
-                if(direction==97 && earlier_direction!=100) // left direction
-                {
-                    if(!leftWalking())
-                        break;
-                }
-                if(direction==100 && earlier_direction!=97) // right direction
-                {
-                    if(!rightWalking())
-                        break;
-                }
-                if(direction==119 && earlier_direction!=115) // up direction
-                {
-                    if(!upWalking())
-                        break;
-                }
-                if(direction==115 && earlier_direction!=119) // down direction
-                {
-                    if(!downWalking())
-                        break;
-                }
-
-                if(direction==97 || direction==100 || direction==115 || direction==119) // direction must have those value
-                    earlier_direction = direction;
-
-                _sleep(200);
-                system("cls");
-            }
-            else
-            {
-                if(directionCheckOpposite())
-                {
-                    earlier_direction = direction;
-                }
-                if (kbhit())
+                if (kbhit()) // change direction
                 {
                     direction = getch();
-                    earlier_direction = direction;
                 }
+                if(directionCheck())
+                {
+
+                    if(direction==97 && earlier_direction!=100) // left direction
+                    {
+                        if(!walking(LEFT))
+                            break;
+                    }
+                    if(direction==100 && earlier_direction!=97) // right direction
+                    {
+                        if(!walking(RIGHT))
+                            break;
+                    }
+                    if(direction==119 && earlier_direction!=115) // up direction
+                    {
+                        if(!walking(UP))
+                            break;
+                    }
+                    if(direction==115 && earlier_direction!=119) // down direction
+                    {
+                        if(!walking(DOWN))
+                            break;
+                    }
+
+                    if(direction==97 || direction==100 || direction==115 || direction==119) // direction must have those value
+                        earlier_direction = direction;
+
+                    _sleep(150 - speedDecrease);
+                    system("cls");
+                }
+                else
+                {
+                    if(directionCheckOpposite())
+                    {
+                        direction = earlier_direction;
+                    }
+                    if (kbhit())
+                    {
+                        direction = getch();
+                        earlier_direction = direction;
+                    }
+                }
+
+
             }
-
-
+            cout << "GAME OVER" << endl;
         }
-        cout << "GAME OVER";
     }
-
+    void scorePrint()
+    {
+        cout << "Wynik: " << score;
+        _sleep(5000);
+    }
 
 private:
 
@@ -206,8 +216,7 @@ private:
             return false;
     }
 
-
-    bool leftWalking()
+    bool walking(directionEnum direction)
     {
         mapa.field[snake.snake.back().x][snake.snake.back().y]=1 ; // O -> "
         for(int i=snake.snake.size()-1; i>0; i--)
@@ -215,7 +224,15 @@ private:
             snake.snake[i].x = snake.snake[i-1].x;
             snake.snake[i].y = snake.snake[i-1].y;
         }
-        snake.snake[0].y = snake.snake[0].y-1;
+        if(direction == LEFT)
+            snake.snake[0].y = snake.snake[0].y-1;
+        if(direction == RIGHT)
+            snake.snake[0].y = snake.snake[0].y+1;
+        if(direction == UP)
+            snake.snake[0].x = snake.snake[0].x-1;
+        if(direction == DOWN)
+            snake.snake[0].x = snake.snake[0].x+1;
+
         if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=0)
         {
             if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=2)
@@ -231,155 +248,76 @@ private:
             }
             else
             {
-                if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
+                if(direction == LEFT)
                 {
-                    snake.snake[0].y = mapa.horizontal-2;
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-                    mapa.field[snake.snake[0].x][0] = 2;
-                    mapa.field[snake.snake[0].x][mapa.horizontal-1]=2;
-                }else
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
+                    if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
+                    {
+                        snake.snake[0].y = mapa.horizontal-2;
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
+                        mapa.field[snake.snake[0].x][0] = 2;
+                        mapa.field[snake.snake[0].x][mapa.horizontal-1]=2;
+                    }
+                    else
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
+                        snake.addingBodyToSnake();
+                        appleGenerator();
+                    }
                 }
-
+                if(direction == RIGHT)
+                {
+                    if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[(snake.snake[0].x)][1];
+                        snake.snake[0].y = 1;
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
+                        mapa.field[snake.snake[0].x][mapa.horizontal-1] = 2;
+                        mapa.field[snake.snake[0].x][0]=2;
+                    }
+                    else
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
+                        snake.addingBodyToSnake();
+                        appleGenerator();
+                    }
+                }
+                if(direction == UP)
+                {
+                    if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[mapa.vertical-1][snake.snake[0].y];
+                        snake.snake[0].x = mapa.vertical-2;
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
+                        mapa.field[0][snake.snake[0].y] = 2;
+                        mapa.field[mapa.vertical-1][snake.snake[0].y]=2;
+                    }
+                    else
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
+                        snake.addingBodyToSnake();
+                        appleGenerator();
+                    }
+                }
+                if(direction == DOWN)
+                {
+                    if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[1][snake.snake[0].y];
+                        snake.snake[0].x = 1;
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
+                        mapa.field[0][snake.snake[0].y] = 2;
+                        mapa.field[mapa.vertical-1][snake.snake[0].y]=2;
+                    }
+                    else
+                    {
+                        mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
+                        snake.addingBodyToSnake();
+                        appleGenerator();
+                    }
+                }
             }
-        } else return false;
-
-        mapa.printMap();
-        return true;
-    }
-
-    bool rightWalking()
-    {
-        mapa.field[snake.snake.back().x][snake.snake.back().y]=1 ; // O -> "
-        for(int i=snake.snake.size()-1; i>0; i--)
-        {
-            snake.snake[i].x = snake.snake[i-1].x;
-            snake.snake[i].y = snake.snake[i-1].y;
         }
-        snake.snake[0].y = snake.snake[0].y+1;
-        if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=0)
-        {
-            if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=2)
-            {
-                if(mapa.field[snake.snake[0].x][snake.snake[0].y]==3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-                else
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-            }
-            else
-            {
-                if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[(snake.snake[0].x)][1];
-                    snake.snake[0].y = 1;
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-                    mapa.field[snake.snake[0].x][mapa.horizontal-1] = 2;
-                    mapa.field[snake.snake[0].x][0]=2;
-                }else
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-
-            }
-        } else return false;
-        mapa.printMap();
-        return true;
-    }
-
-    bool upWalking()
-    {
-        mapa.field[snake.snake.back().x][snake.snake.back().y]=1 ; // O -> "
-        for(int i=snake.snake.size()-1; i>0; i--)
-        {
-            snake.snake[i].x = snake.snake[i-1].x;
-            snake.snake[i].y = snake.snake[i-1].y;
-        }
-        snake.snake[0].x = snake.snake[0].x-1;
-        if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=0)
-        {
-            if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=2)
-            {
-                if(mapa.field[snake.snake[0].x][snake.snake[0].y]==3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-                else
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-            }
-            else
-            {
-                if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[mapa.vertical-1][snake.snake[0].y];
-                    snake.snake[0].x = mapa.vertical-2;
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-                    mapa.field[0][snake.snake[0].y] = 2;
-                    mapa.field[mapa.vertical-1][snake.snake[0].y]=2;
-                }else
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-
-            }
-        } else return false;
-
-        mapa.printMap();
-        return true;
-    }
-
-    bool downWalking()
-    {
-        mapa.field[snake.snake.back().x][snake.snake.back().y]=1 ; // O -> "
-        for(int i=snake.snake.size()-1; i>0; i--)
-        {
-            snake.snake[i].x = snake.snake[i-1].x;
-            snake.snake[i].y = snake.snake[i-1].y;
-        }
-        snake.snake[0].x = snake.snake[0].x+1;
-        if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=0)
-        {
-            if(mapa.field[snake.snake[0].x][snake.snake[0].y]!=2)
-            {
-                if(mapa.field[snake.snake[0].x][snake.snake[0].y]==3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-                else
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-            }
-            else
-            {
-                if(mapa.field[(snake.snake[0].x)][mapa.horizontal-2]!=3)
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y] = mapa.field[1][snake.snake[0].y];
-                    snake.snake[0].x = 1;
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // " " -> O
-                    mapa.field[0][snake.snake[0].y] = 2;
-                    mapa.field[mapa.vertical-1][snake.snake[0].y]=2;
-                }else
-                {
-                    mapa.field[snake.snake[0].x][snake.snake[0].y]=0; // a -> O
-                    snake.addingBodyToSnake();
-                    appleGenerator();
-                }
-
-            }
-        } else return false;
+        else return false;
 
         mapa.printMap();
         return true;
@@ -409,6 +347,8 @@ private:
         }
         //mapa.field[x_position_of_apple][x_position_of_apple] = 3; // generate next apple
         mapa.field.at(x_position_of_apple).at(y_position_of_apple) = 3;
+        speedDecrease =  speedDecrease +5;
+        score++;
     }
 
 
@@ -418,5 +358,6 @@ int main()
 {
     Game game(8,20);
     game.startGame();
+    game.scorePrint();
     return 0;
 }
